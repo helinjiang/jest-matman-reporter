@@ -11,6 +11,36 @@ export interface IJestMatmanReporterOptions {
   matman?: IMatmanCustomOptions;
 }
 
+export interface IJestMatmanReporterResult {
+  testSuites: {
+    // 未通过的数量
+    failed: number;
+
+    // 跳过不执行的数量
+    skipped: number;
+
+    // 通过的数量
+    passed: number;
+
+    // 总数
+    total: number;
+  };
+  tests: {
+    // 未通过的数量
+    failed: number;
+
+    // 跳过不执行的数量
+    skipped: number;
+
+    // 通过的数量
+    passed: number;
+
+    // 总数
+    total: number;
+  };
+}
+
 interface IMatmanCustomOptions {
   outputPath?: string;
+  resultFilename?: string;
 }

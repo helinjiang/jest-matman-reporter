@@ -1,3 +1,9 @@
+import path from 'path';
+
+import CliTable3 from 'cli-table3';
+import colors from 'colors/safe';
+import fse from 'fs-extra';
+
 import { Config } from '@jest/types';
 import { Context, Test, ReporterOnStartOptions } from '@jest/reporters';
 import { AggregatedResult, TestResult } from '@jest/test-result';
@@ -6,7 +12,7 @@ import { AggregatedResult, TestResult } from '@jest/test-result';
 // @ts-ignore
 import JestHtmlReporters from 'jest-html-reporters';
 
-import { IJestMatmanReporterOptions } from './types';
+import { IJestMatmanReporterOptions, IJestMatmanReporterResult } from './types';
 
 // https://brunoscheufler.com/blog/2020-02-14-supercharging-jest-with-custom-reporters
 // https://github.com/dkelosky/jest-stare/blob/master/src/reporter/Reporter.ts
@@ -75,10 +81,6 @@ export default class JestMatmanReporter extends JestHtmlReporters {
   public async onRunComplete(contexts: Set<Context>, results: AggregatedResult) {
     await super.onRunComplete(contexts, results);
 
-    if (this.mOptions?.matman) {
-      console.log('=this.mOptions?.matman=', this.mOptions?.matman);
-    }
-
     // 这里的取值参考了 @jest/reporters 里面 utils.js 中的写法
     const suitesFailed = results.numFailedTestSuites;
     const suitesPassed = results.numPassedTestSuites;
@@ -90,7 +92,7 @@ export default class JestMatmanReporter extends JestHtmlReporters {
     const testsPending = results.numPendingTests;
     const testsTotal = results.numTotalTests;
 
-    const result = {
+    const result: IJestMatmanReporterResult = {
       testSuites: {
         // 未通过的数量
         failed: suitesFailed,
@@ -119,6 +121,41 @@ export default class JestMatmanReporter extends JestHtmlReporters {
       },
     };
 
-    console.log('0000result: ', result);
+    showResultUseTable(result);
+
+    // 输出目录
+    const publicPath =
+      this.mOptions?.matman?.outputPath || this.mOptions?.publicPath || process.cwd();
+
+    const resultFilename =
+      this.mOptions?.matman?.resultFilename || 'jest-matman-reporter-result.json';
+
+    fse.outputJsonSync(path.resolve(publicPath, resultFilename), result);
   }
+}
+
+function showResultUseTable(result: IJestMatmanReporterResult): void {
+  const cliTable3 = new CliTable3({
+    head: [],
+  });
+
+  cliTable3.push(['', 'Total', 'Passed', 'Failed', 'Pending']);
+
+  cliTable3.push([
+    'Test Suites',
+    result.testSuites.total,
+    colors.green(result.testSuites.passed + ''),
+    colors.red(result.testSuites.failed + ''),
+    colors.yellow(result.testSuites.skipped + ''),
+  ]);
+
+  cliTable3.push([
+    'Tests',
+    result.tests.total,
+    colors.green(result.tests.passed + ''),
+    colors.red(result.tests.failed + ''),
+    colors.yellow(result.tests.skipped + ''),
+  ]);
+
+  console.log(cliTable3.toString());
 }
