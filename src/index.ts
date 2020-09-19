@@ -75,8 +75,8 @@ export default class JestMatmanReporter extends JestHtmlReporters {
   public async onRunComplete(contexts: Set<Context>, results: AggregatedResult) {
     await super.onRunComplete(contexts, results);
 
-    if (this.mOptions?.outputPath) {
-      console.log('=this.mOptions?.outputPath=', this.mOptions?.outputPath);
+    if (this.mOptions?.matman) {
+      console.log('=this.mOptions?.matman=', this.mOptions?.matman);
     }
 
     // 这里的取值参考了 @jest/reporters 里面 utils.js 中的写法
