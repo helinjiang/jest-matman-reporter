@@ -2,6 +2,10 @@ import { Config } from '@jest/types';
 import { Context, Test, ReporterOnStartOptions } from '@jest/reporters';
 import { AggregatedResult, TestResult } from '@jest/test-result';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import JestHtmlReporters from 'jest-html-reporters';
+
 import { IJestMatmanReporterOptions } from './types';
 
 // https://brunoscheufler.com/blog/2020-02-14-supercharging-jest-with-custom-reporters
@@ -9,7 +13,7 @@ import { IJestMatmanReporterOptions } from './types';
 
 // import { Reporter } from '@jest/reporters';
 // export default class JestMatmanReporter implements Pick<Reporter, 'onRunComplete'> {
-export default class JestMatmanReporter {
+export default class JestMatmanReporter extends JestHtmlReporters {
   public mGlobalConfig: Config.InitialOptions;
 
   /**
@@ -27,6 +31,7 @@ export default class JestMatmanReporter {
    * @memberof Reporter
    */
   constructor(mGlobalConfig: Config.InitialOptions, mOptions: IJestMatmanReporterOptions) {
+    super(mGlobalConfig, mOptions);
     this.mGlobalConfig = mGlobalConfig;
     this.mOptions = mOptions;
   }
@@ -67,7 +72,9 @@ export default class JestMatmanReporter {
    * @param {IResultsProcessorInput} results - jest summarized results
    * @memberof Reporter
    */
-  public onRunComplete(contexts: Set<Context>, results: AggregatedResult) {
+  public async onRunComplete(contexts: Set<Context>, results: AggregatedResult) {
+    await super.onRunComplete(contexts, results);
+
     if (this.mOptions?.outputPath) {
       console.log('=this.mOptions?.outputPath=', this.mOptions?.outputPath);
     }
@@ -112,6 +119,6 @@ export default class JestMatmanReporter {
       },
     };
 
-    console.log('result: ', result);
+    console.log('0000result: ', result);
   }
 }
